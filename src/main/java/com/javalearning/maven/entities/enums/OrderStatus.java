@@ -19,11 +19,12 @@ public enum OrderStatus {
 	}
 	
 	public static OrderStatus valueOf(int code) {
+		//.values() returns an array of all status
 		for(OrderStatus value : OrderStatus.values()) {
 			if(value.getCode()==code)
 				return value;
 		}
-		throw new IllegalArgumentException("Illegal OrderStatus code");
+		throw new IllegalArgumentException("Invalid OrderStatus code");
 	}
 
 }
