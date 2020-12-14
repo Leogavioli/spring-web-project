@@ -2,13 +2,18 @@ package com.javalearning.maven.entities;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -33,6 +38,14 @@ public class Order implements Serializable{
 	@ManyToOne
 	@JoinColumn(name="client_id")
 	private User client;
+	
+	//id refers to OrderItem where the id is embedded from OrderItemPK where the orders are 'stored'
+	@OneToMany(mappedBy="id.order")
+	private Set<OrderItem> items = new HashSet<>();
+	
+	//cascade allows to map both objects to the same id
+	@OneToOne(mappedBy="order",cascade=CascadeType.ALL)
+	private Payment payment;
 
 	public Order() {
 	}
@@ -60,6 +73,10 @@ public class Order implements Serializable{
 	public void setMoment(Instant moment) {
 		this.moment = moment;
 	}
+	
+	public Set<OrderItem> getItems(){
+		return items;
+	}
 
 	public OrderStatus getOrderStatus() {
 		return OrderStatus.valueOf(orderStatus);
@@ -70,7 +87,15 @@ public class Order implements Serializable{
 		if(orderStatus!=null)
 			this.orderStatus = orderStatus.getCode();
 		//Receives an order status and converts it to Integer
-		}
+	}
+	
+	public Payment getPayment() {
+		return payment;
+	}
+
+	public void setPayment(Payment payment) {
+		this.payment = payment;
+	}
 	
 	public User getClient() {
 		return client;
@@ -78,6 +103,14 @@ public class Order implements Serializable{
 
 	public void setClient(User client) {
 		this.client = client;
+	}
+	
+	public Double getTotal() {
+		double total = 0.0;
+		for(OrderItem x: items) {
+			total+=x.getSubTotal();
+		}
+		return total;
 	}
 
 	@Override
@@ -104,6 +137,8 @@ public class Order implements Serializable{
 			return false;
 		return true;
 	}
+
+	
 	
 	
 }
